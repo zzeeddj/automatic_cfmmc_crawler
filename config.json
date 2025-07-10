@@ -1,0 +1,23 @@
+{
+  "output_dir": "./downloads",
+  "accounts": [
+    {
+      "division_name": "xxxx",
+      "company_short": "xxxx",
+      "account_no": "xxxxxxxx",
+      "password": "xxxxxx"
+    },
+    {
+      "division_name": "xxxx",
+      "company_short": "xxxx",
+      "account_no": "xxxxxxxx",
+      "password": "xxxxxx"
+    },
+    {
+      "division_name": "xxxx",
+      "company_short": "xxxx",
+      "account_no": "xxxxxxxx",
+      "password": "xxxxxx"
+    }
+  ]
+}
