@@ -24,8 +24,10 @@ requests==2.28.1
 beautifulsoup4==4.11.1
 ddddocr==1.4.11
 Pillow==9.3.0
+```
 
 ##项目结构
+```text
 futures-statement-downloader/
 ├── main.py               # 程序入口
 ├── config.json           # 配置文件（自动生成）
