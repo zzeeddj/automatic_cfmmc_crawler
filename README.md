@@ -26,7 +26,7 @@ ddddocr==1.4.11
 Pillow==9.3.0
 ```
 
-##项目结构
+## 项目结构
 ```text
 futures-statement-downloader/
 ├── main.py               # 程序入口
@@ -44,3 +44,4 @@ futures-statement-downloader/
         │   └── 事业部名称-公司简称_2023-01.xls
         └── 逐笔/
             └── 事业部名称-公司简称_2023-01.xls
+```
