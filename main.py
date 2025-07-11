@@ -274,7 +274,7 @@ class DownloadThread(QThread):
                     except VerificationCodeError:
                         retry_count += 1
                         if retry_count >= self.max_retry:
-                            self.login_failed.emit(f"{account['division_name']} 登录失败: 验证码错误次数过多")
+                            self.login_failed.emit(f"{account['company_short']}({account['account_no']}) 登录失败: 验证码错误次数过多")
                             self.captcha_required.emit(captcha_image)
 
                             # 等待验证码输入
@@ -292,7 +292,7 @@ class DownloadThread(QThread):
                         self.login_failed.emit(str(e))
                         break
                     except Exception as e:
-                        self.login_failed.emit(f"{account['division_name']} 登录失败: {str(e)}")
+                        self.login_failed.emit(f"{account['company_short']}({account['account_no']}) 登录失败: {str(e)}")
                         break
 
                 if not login_success or self.cancelled:
@@ -329,11 +329,11 @@ class DownloadThread(QThread):
                                 file_path = crawler.get_daily_data(date, query_type)
                                 current_task_progress = (current_task * 100 + (
                                         day_idx + 1) / total_days * 100) / total_tasks
-                                msg = f"{account['division_name']} - {date.strftime('%Y-%m-%d')} {query_type}报表下载完成"
+                                msg = f"{account['company_short']}({account['account_no']}) - {date.strftime('%Y-%m-%d')} {query_type}报表下载完成"
                                 self.progress_updated.emit(int(current_task_progress), msg)
                             except Exception as e:
                                 self.error_occurred.emit(
-                                    f"{account['division_name']} {date.strftime('%Y-%m-%d')} {query_type}报表下载失败: {str(e)}")
+                                    f"{account['company_short']}({account['account_no']}) {date.strftime('%Y-%m-%d')} {query_type}报表下载失败: {str(e)}")
 
                         current_task += 1
 
@@ -353,11 +353,11 @@ class DownloadThread(QThread):
                                 file_path = crawler.get_monthly_data(month, query_type)
                                 current_task_progress = (current_task * 100 + (
                                         month_idx + 1) / total_months * 100) / total_tasks
-                                msg = f"{account['division_name']} - {month.strftime('%Y-%m')} {query_type}报表下载完成"
+                                msg = f"{account['company_short']}({account['account_no']}) - {month.strftime('%Y-%m')} {query_type}报表下载完成"
                                 self.progress_updated.emit(int(current_task_progress), msg)
                             except Exception as e:
                                 self.error_occurred.emit(
-                                    f"{account['division_name']} {month.strftime('%Y-%m')} {query_type}报表下载失败: {str(e)}")
+                                    f"{account['company_short']}({account['account_no']}) {month.strftime('%Y-%m')} {query_type}报表下载失败: {str(e)}")
 
                         current_task += 1
 
@@ -366,14 +366,14 @@ class DownloadThread(QThread):
 
                 # 更新进度
                 account_progress = int((idx + 1) / total_accounts * 100)
-                self.progress_updated.emit(account_progress, f"{account['division_name']} 下载完成")
+                self.progress_updated.emit(account_progress, f"{account['company_short']}({account['account_no']}) 下载完成")
 
             except Exception as e:
-                self.error_occurred.emit(f"{account['division_name']} 下载失败: {str(e)}")
+                self.error_occurred.emit(f"{account['company_short']}({account['account_no']}) 下载失败: {str(e)}")
                 continue  # 继续下一个账户
 
         self.finished.emit()
-
+      
     def cancel(self):
         self.cancelled = True
         self.captcha_code = None
