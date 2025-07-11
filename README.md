@@ -59,4 +59,3 @@ futures-statement-downloader/
 
 ## 内容改动
 - 2025.7.10 将进度显示和错误提示中的 `account['division_name']` 改为 `account['company_short']` 及 `account['account_no']`
-- 2025.7.11 改进了下载流程，同时新增了错误账户记录功能及重新下载失败账户（排除密码错误账户）功能
