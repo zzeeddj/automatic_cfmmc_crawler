@@ -216,6 +216,8 @@ class CFMMCCrawler(object):
         return storage
 
 
+# ... (前面的代码保持不变)
+
 class DownloadThread(QThread):
     """下载线程"""
     progress_updated = pyqtSignal(int, str)
@@ -373,7 +375,7 @@ class DownloadThread(QThread):
                 continue  # 继续下一个账户
 
         self.finished.emit()
-      
+
     def cancel(self):
         self.cancelled = True
         self.captcha_code = None
