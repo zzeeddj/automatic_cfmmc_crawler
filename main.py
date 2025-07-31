@@ -1,4 +1,4 @@
-import sys 
+import sys
 import os
 import datetime as dt
 import json
@@ -154,14 +154,31 @@ class CFMMCCrawler(object):
         self._download_file(self.excel_daily_download_url, full_path)
         return full_path
 
-    def get_monthly_data(self, month: dt.date, query_type: str) -> str:
-        """下载月报数据"""
+    def _preload_monthly_data(self, month: dt.date, query_type: str) -> None:
+        """预加载月报数据，不保存文件，用于初始化会话状态"""
         self._check_args(query_type)
 
         trade_date = month.strftime('%Y-%m')
+
+        post_data = {
+            "org.apache.struts.taglib.html.TOKEN": self.token,
+            "tradeDate": trade_date,
+            "byType": self.query_type_dict[query_type]
+        }
+        data_page = self._ss.post(self.data_url, data=post_data, headers=self.header, timeout=5)
+        self.token = self._get_token(data_page.text)
+
+        # 仅请求数据但不保存
+        self._ss.get(self.excel_monthly_download_url)
+
+    def get_monthly_data(self, date: dt.date, query_type: str) -> str:
+        """下载月报数据"""
+        self._check_args(query_type)
+
+        trade_date = date.strftime('%Y-%m')
         # 修改月报路径和文件名格式 - 按查询类型创建子目录
         path = os.path.join(self.output_dir, "月报", query_type)
-        file_name = f"{self.division_name}-{self.company_short}_{month.strftime('%Y-%m')}.xls"
+        file_name = f"{self.division_name}-{self.company_short}_{date.strftime('%Y-%m')}.xls"
         full_path = os.path.join(path, file_name)
         os.makedirs(path, exist_ok=True)
 
@@ -215,8 +232,6 @@ class CFMMCCrawler(object):
             start = dt.date(next_year, next_month, 1)
         return storage
 
-
-# ... (前面的代码保持不变)
 
 class DownloadThread(QThread):
     """下载线程"""
@@ -276,7 +291,8 @@ class DownloadThread(QThread):
                     except VerificationCodeError:
                         retry_count += 1
                         if retry_count >= self.max_retry:
-                            self.login_failed.emit(f"{account['company_short']}({account['account_no']}) 登录失败: 验证码错误次数过多")
+                            self.login_failed.emit(
+                                f"{account['company_short']}({account['account_no']}) 登录失败: 验证码错误次数过多")
                             self.captcha_required.emit(captcha_image)
 
                             # 等待验证码输入
@@ -294,7 +310,8 @@ class DownloadThread(QThread):
                         self.login_failed.emit(str(e))
                         break
                     except Exception as e:
-                        self.login_failed.emit(f"{account['company_short']}({account['account_no']}) 登录失败: {str(e)}")
+                        self.login_failed.emit(
+                            f"{account['company_short']}({account['account_no']}) 登录失败: {str(e)}")
                         break
 
                 if not login_success or self.cancelled:
@@ -348,6 +365,18 @@ class DownloadThread(QThread):
                         if self.cancelled:
                             break
 
+                        # 关键修改：在下载第一个月数据前，先进行一次预加载（不保存文件）
+                        if months:  # 确保有月份数据
+                            try:
+                                # 预加载第一个月的数据但不保存，以初始化会话状态
+                                crawler._preload_monthly_data(months[0], query_type)
+                                self.progress_updated.emit(int(current_task * 100 / total_tasks),
+                                                           f"{account['company_short']} 初始化月报下载会话...")
+                            except Exception as e:
+                                self.error_occurred.emit(
+                                    f"{account['company_short']} 月报会话初始化失败: {str(e)}")
+                                continue
+
                         for month_idx, month in enumerate(months):
                             if self.cancelled:
                                 break
@@ -368,7 +397,8 @@ class DownloadThread(QThread):
 
                 # 更新进度
                 account_progress = int((idx + 1) / total_accounts * 100)
-                self.progress_updated.emit(account_progress, f"{account['company_short']}({account['account_no']}) 下载完成")
+                self.progress_updated.emit(account_progress,
+                                           f"{account['company_short']}({account['account_no']}) 下载完成")
 
             except Exception as e:
                 self.error_occurred.emit(f"{account['company_short']}({account['account_no']}) 下载失败: {str(e)}")
